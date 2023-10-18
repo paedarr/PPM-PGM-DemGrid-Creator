@@ -96,18 +96,18 @@ DEMGrid :: DEMGrid(fTypeDec f){
         }
     }
 
-    demArr = new float *[this->width];
+    demArr = new float*[this->width];
     for (int i = 0; i < this->width; ++i) {
         demArr[i] = new float[this->height];
     }
 
-    int rows = this->height;   //x axis
-    int cols = this->width;  //y axis
+    int rows = this->width;   //x axis
+    int cols = this->height;  //y axis
 
     //fills the demArr with the data in the .grd file
     for (int r = 0; r < rows; r++){
         getline(gridFile, line);
-        istringstream ss(line);
+        stringstream ss(line);
         for (int c = 0; c < cols; c++){
             ss >> demArr[r][c];
         }
@@ -243,27 +243,37 @@ int DEMGrid :: assembleColorRed(float f){
 */
 PPM :: PPM() : DEMGrid(_PPM_){
     float ** getArr = getdemArr();
-    ppmWidth = (DEMGrid::width) * 3;
-    ppmHeight = (DEMGrid::height);
+    ppmWidth = (DEMGrid::width);
+    ppmHeight = (DEMGrid::height) * 3;
     
     //One cell in PPM Array has 3 values, RGB - so, three locations are being used for one cell
-    ppmArr = new float*[ppmHeight]; //creates new 2d matrix using the adjusted width & height for ppm
-    for (int i = 0; i < ppmHeight; ++i) {
-        ppmArr[i] = new float[ppmWidth];
+    ppmArr = new float*[ppmWidth]; //creates new 2d matrix using the adjusted width & height for ppm
+    for (int i = 0; i < ppmWidth; ++i) {
+        ppmArr[i] = new float[ppmHeight];
     }
 
 
 
-    for (int rows = 0; rows < this->ppmHeight; rows++){
-        for (int cols = 0; cols < this->ppmWidth; cols+= 3){ 
+    for (int rows = 0; rows < this->ppmWidth; rows++){
+        for (int cols = 0; cols < this->ppmHeight; cols++){ 
             float num = getArr[rows][cols / 3]; 
+            for (int n = 0; n < 3; n++){
+                if (n == 0){
                     //red val
                     ppmArr[rows][cols] = assembleColorRed(num);
+                    cols++;
+                }
+                else if (n == 1){
                     //green val
-                    ppmArr[rows][cols + 1] = assembleColorGreen(num);
+                    ppmArr[rows][cols] = assembleColorGreen(num);
+                    cols++;
+                }
+                else if (n == 2){
                     //blue val
-                    ppmArr[rows][cols + 2] = 0.0;
+                    ppmArr[rows][cols] = 0.0;
                     //doesn't need cols++, since prev for loop already indexes it
+                }
+            }
         }
     }
 
